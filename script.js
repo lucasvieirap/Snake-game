@@ -62,6 +62,7 @@ class Player {
 			break;
 		}
 	}
+	
 };
 
 let PlayerObj = new Player(0, 0, "green", "none");
@@ -70,26 +71,44 @@ let AppleObj = new GameObject(Math.floor(Math.random() * 20), Math.floor(Math.ra
 document.addEventListener('keydown', (e) => {
 	switch (e.keyCode) {
 	case 83:
-		PlayerObj.movement = "down";
+		PlayerObj.movement == "up" ? PlayerObj.movement = "up" : PlayerObj.movement = "down";
 		break;
 	case 68:
-		PlayerObj.movement = "right";
+		PlayerObj.movement == "left" ? PlayerObj.movement = "left" : PlayerObj.movement = "right";
 		break;
 	case 87:
-		PlayerObj.movement = "up";
+		PlayerObj.movement == "down" ? PlayerObj.movement = "down" : PlayerObj.movement = "up";
 		break;
 	case 65:
-		PlayerObj.movement = "left";
+		PlayerObj.movement == "right" ? PlayerObj.movement = "right" : PlayerObj.movement = "left";
 		break;
 	}
 })
 
 setInterval(() => {
 	PlayerObj.move();
+
 	if (checkCollision(PlayerObj.body.head, AppleObj.pos)) {
-		PlayerObj.body.tail.push({x: AppleObj.pos.x, y: AppleObj.pos.y});
+		AppleObj.pos = {x: Math.floor(Math.random() * 20), y: Math.floor(Math.random() * 20)};
+		PlayerObj.body.tail.push({x: -1, y: -1});
+	};
+
+	PlayerObj.body.tail.map(block => {
+		if (checkCollision(PlayerObj.body.head, block)) {
+			PlayerObj.body.tail = [];
+			PlayerObj.body.head = {x: 0, y: 0};
+			PlayerObj.movement = "none";
+			AppleObj.pos = {x: Math.floor(Math.random() * 20), y: Math.floor(Math.random() * 20)};
+		}
+	})
+
+	if (checkOutOfBoundaries(PlayerObj.body.head)) {
+		PlayerObj.body.tail = [];
+		PlayerObj.body.head = {x: 0, y: 0};
+		PlayerObj.movement = "none";
 		AppleObj.pos = {x: Math.floor(Math.random() * 20), y: Math.floor(Math.random() * 20)};
 	};
+
 	render(PlayerObj, AppleObj);
 }, 200);
 
@@ -103,4 +122,11 @@ function checkCollision(pos1, pos2) {
 function render(...gameObjects) {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	gameObjects.map(gameObject => gameObject.draw());
+}
+
+function checkOutOfBoundaries(pos) {
+	if (pos.x > 20 || pos.y > 20 || pos.x < 0 || pos.y < 0) {
+		return true;
+	}
+	return false;
 }
